@@ -1,37 +1,43 @@
 "use client";
 import { EmailIcon, PasswordIcon } from "@/assets/icons";
-import Link from "next/link";
 import React, { useState } from "react";
 import InputGroup from "../FormElements/InputGroup";
-import { Checkbox } from "../FormElements/checkbox";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 
 export default function SigninWithPassword() {
-  const [data, setData] = useState({
-    email: process.env.NEXT_PUBLIC_DEMO_USER_MAIL || "",
-    password: process.env.NEXT_PUBLIC_DEMO_USER_PASS || "",
-    remember: false,
+  const supabase = createClientComponentClient();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [credentials, setCredentials] = useState({
+    email: "",
+    password: "",
   });
 
-  const [loading, setLoading] = useState(false);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setData({
-      ...data,
+    setCredentials({
+      ...credentials,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading((prev) => !prev);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
 
-    // You can remove this code block
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    if (data.user) {
+      router.push("/");
+      setLoading((prev) => !prev);
+    } else {
+      setError(error?.message ?? null);
+      setLoading((prev) => !prev);
+    }
   };
-
   return (
     <form onSubmit={handleSubmit}>
       <InputGroup
@@ -41,7 +47,7 @@ export default function SigninWithPassword() {
         placeholder="Enter your email"
         name="email"
         handleChange={handleChange}
-        value={data.email}
+        value={credentials.email}
         icon={<EmailIcon />}
       />
 
@@ -52,11 +58,11 @@ export default function SigninWithPassword() {
         placeholder="Enter your password"
         name="password"
         handleChange={handleChange}
-        value={data.password}
+        value={credentials.password}
         icon={<PasswordIcon />}
       />
 
-      <div className="mb-6 flex items-center justify-between gap-2 py-2 font-medium">
+      {/* <div className="mb-6 flex items-center justify-between gap-2 py-2 font-medium">
         <Checkbox
           label="Remember me"
           name="remember"
@@ -77,14 +83,22 @@ export default function SigninWithPassword() {
         >
           Forgot Password?
         </Link>
-      </div>
+      </div> */}
+
+      {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
 
       <div className="mb-4.5">
         <button
           type="submit"
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
+          className={`flex w-full items-center justify-center gap-2 rounded-lg p-4 font-medium text-white transition
+    ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-primary hover:bg-opacity-90"
+    }`}
+          disabled={loading}
         >
-          Sign In
+          {loading ? "Signing In..." : "Sign In"}
           {loading && (
             <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-t-transparent dark:border-primary dark:border-t-transparent" />
           )}

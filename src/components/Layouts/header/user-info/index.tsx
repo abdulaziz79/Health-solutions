@@ -9,17 +9,48 @@ import {
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogOutIcon, SettingsIcon, UserIcon } from "./icons";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export function UserInfo() {
   const [isOpen, setIsOpen] = useState(false);
+
+  type UserMetadata = {
+    firstName?: string;
+    lastName?: string;
+    roleId?: string;
+    dateOfBirth?: string;
+    [key: string]: any;
+  };
+
+  const [currentUser, setCurrentUser] = useState<UserMetadata | undefined>(
+    undefined
+  );
+
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      // console.log("data", data);
+      setCurrentUser(data?.user?.user_metadata);
+      if (error) {
+        console.log("Error fetching user:", error.message);
+        return;
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const USER = {
     name: "John Smith",
     email: "johnson@nextadmin.com",
     img: "/images/user/user-03.png",
   };
+
+  console.log("currecnt", currentUser);
 
   return (
     <Dropdown isOpen={isOpen} setIsOpen={setIsOpen}>
@@ -30,19 +61,21 @@ export function UserInfo() {
           <Image
             src={USER.img}
             className="size-12"
-            alt={`Avatar of ${USER.name}`}
+            alt={`Avatar of ${currentUser?.firstName}`}
             role="presentation"
             width={200}
             height={200}
           />
           <figcaption className="flex items-center gap-1 font-medium text-dark dark:text-dark-6 max-[1024px]:sr-only">
-            <span>{USER.name}</span>
+            <span>
+              {currentUser?.firstName} {currentUser?.lastName}
+            </span>
 
             <ChevronUpIcon
               aria-hidden
               className={cn(
                 "rotate-180 transition-transform",
-                isOpen && "rotate-0",
+                isOpen && "rotate-0"
               )}
               strokeWidth={1.5}
             />

@@ -6,12 +6,12 @@
       "esnext"
     ],
     "allowJs": true,
-    "skipLibCheck": true,
+    // "LibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "module": "Esnext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -26,7 +26,8 @@
         "./src/*"
       ]
     },
-    "target": "ES2017"
+    "target": "ESNext",
+    "skipLibCheck": true
   },
   "include": [
     "next-env.d.ts",

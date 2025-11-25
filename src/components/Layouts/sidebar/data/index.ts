@@ -15,6 +15,12 @@ export const NAV_DATA = [
         ],
       },
       {
+        title: "Users Management",
+        url: "/users",
+        icon: Icons.User,
+        items: [],
+      },
+      {
         title: "Calendar",
         url: "/calendar",
         icon: Icons.Calendar,
