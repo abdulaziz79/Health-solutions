@@ -19,6 +19,7 @@ const UserForm: React.FC<UserFormProps> = ({ roles }) => {
   const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
 
   // New state
   const [loading, setLoading] = useState(false);
@@ -31,23 +32,31 @@ const UserForm: React.FC<UserFormProps> = ({ roles }) => {
     setSuccess(null);
 
     try {
+      const formData = new FormData();
+
+      // text fields
+      formData.append("firstName", firstName);  
+      formData.append("lastName", lastName);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("role", selectedRole);
+      formData.append(
+        "dateOfBirth",
+        selectedDate ? selectedDate.toISOString() : ""
+      );
+
+      if (profileImage) {
+        formData.append("image", profileImage);
+      }
+
       const res = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          password,
-          role: Number(selectedRole),
-          dateOfBirth: selectedDate ? selectedDate.toISOString() : null,
-        }),
+        body: formData,
       });
 
       const result = await res.json();
 
       if (!res.ok) {
-        // If API returned an error
         setError(result.error || "Something went wrong");
       } else {
         setSuccess("User created successfully!");
@@ -57,6 +66,7 @@ const UserForm: React.FC<UserFormProps> = ({ roles }) => {
         setPassword("");
         setSelectedRole("");
         setSelectedDate(null);
+        setProfileImage(null);
       }
     } catch (err: any) {
       setError(err.message || "Network error");
@@ -117,6 +127,14 @@ const UserForm: React.FC<UserFormProps> = ({ roles }) => {
         label="Select Role"
         onValueChange={setSelectedRole}
         prefixIcon={<GlobeIcon />}
+      />
+
+      <InputGroup
+        type="file"
+        fileStyleVariant="style1"
+        label="Attach file"
+        placeholder="Attach file"
+        handleChange={(e) => setProfileImage(e.target.files?.[0] || null)}
       />
 
       {error && <p className="text-sm text-red-500 mt-2">{error}</p>}

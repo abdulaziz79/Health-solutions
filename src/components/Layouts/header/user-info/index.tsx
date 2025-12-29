@@ -50,7 +50,7 @@ export function UserInfo() {
     img: "/images/user/user-03.png",
   };
 
-  console.log("currecnt", currentUser);
+  // console.log("currecnt", currentUser);
 
   return (
     <Dropdown isOpen={isOpen} setIsOpen={setIsOpen}>
